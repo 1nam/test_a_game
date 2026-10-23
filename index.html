@@ -30,7 +30,6 @@
             min-height: 100vh;
         }
 
-        /* Sidebar Navigation */
         nav {
             width: 260px;
             background-color: var(--panel-bg);
@@ -80,7 +79,6 @@
             padding-left: 1.25rem;
         }
 
-        /* Main Content Layout */
         main {
             margin-left: 260px;
             padding: 3rem;
@@ -109,7 +107,6 @@
             color: var(--text-main);
         }
 
-        /* Interactive Live Game Section */
         .game-wrapper {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
@@ -178,7 +175,6 @@
             transform: scale(1.03);
         }
 
-        /* Mode Showcase Grid */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -204,7 +200,6 @@
             margin-bottom: 0.5rem;
         }
 
-        /* Documentation Shortcut Tables */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -240,7 +235,6 @@
             box-shadow: 0 1px 0 rgba(0,0,0,0.2);
         }
 
-        /* Command Line Pre-blocks */
         pre {
             background-color: #05070a;
             border: 1px solid var(--border-color);
@@ -260,7 +254,6 @@
             color: var(--text-muted);
         }
 
-        /* Footer */
         footer {
             border-top: 1px solid var(--border-color);
             padding-top: 2rem;
@@ -279,7 +272,6 @@
             text-decoration: underline;
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -303,7 +295,6 @@
 </head>
 <body>
 
-    <!-- Sidebar Dashboard Navigation -->
     <nav>
         <div class="nav-logo">Sauerbraten // Hub</div>
         <ul class="nav-links">
@@ -314,26 +305,32 @@
         </ul>
     </nav>
 
-    <!-- Main Content Stream -->
     <main>
-        
-        <!-- Section 1: Live Engine Interface -->
         <section id="play">
             <h2>Cube 2: Sauerbraten // Browser Client</h2>
-            <p>Welcome to the open-source evaluation ecosystem. Experience authentic desktop arena-shooter gameplay running directly in your modern sandboxed browser window via hardware-accelerated WebGL2.</p>
+            <p>Welcome to the open-source hub. Experience authentic desktop arena shooter action running directly inside your browser window via hardware-accelerated WebGL2.</p>
             
             <div class="game-wrapper">
                 <div class="iframe-container" id="gameFrameContainer">
-                    <!-- Fully operational web port framework mirror -->
+                    <!-- Hardcoded live functional pointer-lock mirror -->
                     <iframe src="https://github.io" allow="fullscreen; pointer-lock"></iframe>
                 </div>
                 <div class="game-controls-bar">
                     <div class="game-tip">
-                        💡 <strong>Pointer Capture:</strong> Click inside the engine screen to lock mouse cursor aim. Press <kbd>ESC</kbd> to unlock. 
-                        <span style="display:block; margin-top:4px; font-size:0.8rem; color:var(--accent-green);">If game box is blank offline, upload files to GitHub to bypass local browser sandbox filters.</span>
+                        💡 <strong>Pointer Capture:</strong> Click inside the engine screen to lock mouse cursor aim. Press <kbd>ESC</kbd> to unlock.
                     </div>
                     <button class="fullscreen-btn" onclick="goFullscreen()">GO FULLSCREEN</button>
                 </div>
             </div>
         </section>
 
+        <section id="modes">
+            <h2>Repertoire of Game Modes</h2>
+            <p>Cube 2 features highly polished rule configurations emphasizing varied movement and pickup physics:</p>
+            <div class="grid-container">
+                <div class="card">
+                    <h3>Efficiency</h3>
+                    <p>Spawn fully armed with maximum shields. No runtime armor item spawn blocks exist. Simply locate targets and out-frag opponents.</p>
+                </div>
+                <div class="card">
+                    <h3>Instagib</h3>

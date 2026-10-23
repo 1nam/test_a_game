@@ -145,6 +145,7 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 1rem;
+            gap: 1rem;
         }
 
         .game-tip {
@@ -167,6 +168,7 @@
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .fullscreen-btn:hover {
@@ -211,6 +213,7 @@
             border-radius: 8px;
             overflow: hidden;
             margin-top: 1rem;
+            margin-bottom: 2rem;
         }
 
         th, td {
@@ -321,20 +324,16 @@
             
             <div class="game-wrapper">
                 <div class="iframe-container" id="gameFrameContainer">
-                    <!-- Fully operational, pointer-lock unblocked public player client -->
+                    <!-- Fully operational web port framework mirror -->
                     <iframe src="https://github.io" allow="fullscreen; pointer-lock"></iframe>
                 </div>
                 <div class="game-controls-bar">
                     <div class="game-tip">
-                        💡 <strong>Pointer Capture:</strong> Click inside the engine screen to lock mouse cursor aim. Press <kbd>ESC</kbd> to unlock.
+                        💡 <strong>Pointer Capture:</strong> Click inside the engine screen to lock mouse cursor aim. Press <kbd>ESC</kbd> to unlock. 
+                        <span style="display:block; margin-top:4px; font-size:0.8rem; color:var(--accent-green);">If game box is blank offline, upload files to GitHub to bypass local browser sandbox filters.</span>
                     </div>
                     <button class="fullscreen-btn" onclick="goFullscreen()">GO FULLSCREEN</button>
                 </div>
             </div>
         </section>
 
-        <!-- Section 2: Repertoire of Game Modes -->
-        <section id="modes">
-            <h2>Repertoire of Game Modes</h2>
-            <p>Cube 2 features highly polished rule configurations emphasizing varied movement and pickup physics:</p>
-            <div class="grid-container">

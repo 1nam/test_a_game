@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUBE 2: SAUERBRATEN // BROWSER HUB</title>
+    <style>
+        :root {
+            --bg-primary: #0b0c10;
+            --bg-secondary: #1f2833;
+            --accent-cyan: #66fcf1;
+            --accent-green: #45f3ff;
+            --text-main: #c5c6c7;
+            --text-bright: #ffffff;
+            --neon-glow: 0 0 10px rgba(102, 252, 241, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            width: 280px;
+            background-color: #050608;
+            border-right: 2px solid var(--bg-secondary);
+            padding: 2rem 1rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        nav h1 {
+            color: var(--accent-cyan);
+            font-size: 1.4rem;
+            text-shadow: var(--neon-glow);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            padding: 0.8rem 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: var(--bg-secondary);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: var(--neon-glow);
+            transform: scale(1.02);
+        }
+
+        /* Main Content Container */
+        main {
+            margin-left: 280px;
+            padding: 2rem;
+            width: calc(100% - 280px);
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+        }
+
+        section {
+            background-color: var(--bg-secondary);
+            border: 1px solid rgba(102, 252, 241, 0.2);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(102, 252, 241, 0.2);
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Game Arena Frame Styling */
+        .game-container {
+            position: relative;
+            background: #000;
+            border: 2px solid var(--accent-cyan);
+            border-radius: 8px;
+            box-shadow: var(--neon-glow);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            display: block;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #050608;
+            padding: 1rem;
+            border-top: 1px solid rgba(102, 252, 241, 0.2);
+        }
+
+        .btn-fullscreen {
+            background: transparent;
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .btn-fullscreen:hover {
+            background-color: var(--accent-cyan);
+            color: var(--bg-primary);
+            box-shadow: var(--neon-glow);
+        }
+
+        .warning-text {
+            color: #ff5555;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* Grid Layouts */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: #121821;
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+        }
+
+        .card h3 {
+            color: var(--text-bright);
+            margin-bottom: 0.8rem;
+        }
+
+        /* Documentation & Code Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            color: var(--accent-cyan);
+            background-color: #121821;
+        }
+
+        pre {
+            background-color: #050608;
+            color: #45f3ff;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        /* Responsive Layout fixes */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            nav { width: 100%; height: auto; position: relative; }
+            main { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>SAUERBRATEN // HUB</h1>
+        <a href="#play" class="active">🎮 Play Game</a>
+        <a href="#modes">🎯 Game Modes</a>
+        <a href="#editing">🛠️ Map Editing</a>
+        <a href="#commands">💻 Console Sheet</a>
+    </nav>
+
+    <main>
+        <!-- SECTION 1: PLAY LIVE -->
+        <section id="play">
+            <h2>🎮 Hero &amp; Play Live Arena</h2>
+            <p style="margin-bottom: 1rem;">Play, create, and share entirely for free. No account registration, no monetization, pure open-source arena shooting.</p>
+            
+            <div class="game-container" id="arena-container">
+                <!-- Using cfoust's compiled WebGL2 Emscripten port of Sauerbraten -->
+                <iframe src="https://cfoust.github.io/sour/" class="game-frame" id="game-frame"></iframe>
+                
+                <div class="game-controls">
+                    <span class="warning-text">⚠️ CLICK INSIDE WINDOW TO LOCK MOUSE. PRESS [ESC] TO EXIT FULLSCREEN/RELEASE MOUSE.</span>
+                    <button class="btn-fullscreen" onclick="goFullscreen()">Go Fullscreen</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GAME MODES -->
+        <section id="modes">
+            <h2>🎯 Repertoire of Game Modes</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Efficiency</h3>
+                    <p>You spawn with all weapons and armor available immediately. Pure fragging speed with no item timing required.</p>
+                </div>
+                <div class="card">
+                    <h3>Instagib</h3>
+                    <p>1 Hit Point. Railgun rifles only. Instant death upon impact. Demands absolute flick-shot perfection.</p>
+                </div>
+                <div class="card">
+                    <h3>Tactical</h3>
+                    <p>Health and heavy battle armor pickups map layout control determine the winner. High strategy pacing.</p>
+                </div>
+                <div class="card">
+                    <h3>Capture the Flag</h3>
+                    <p>Secure enemy team flags or systematically hold down specific structural bases to stack points.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MAP EDITING -->
+        <section id="editing">
+            <h2>🛠️ Real-Time Map Editing Sheet</h2>
+            <p>Cube 2 features real-time, sandbox collaborative editing inside the operational game client engine.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action shortcut</th>
+                        <th>Function Command Mapping</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>E / Ctrl + E</strong></td>
+                        <td>Toggle instantly between Sandbox Edit Mode and Active Play Mode</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scroll Wheel</strong></td>
+                        <td>Push or Pull selected map geometry grids and cube structures</td>
+                    </tr>
+                    <tr>
+                        <td><strong>/newmap</strong></td>
+                        <td>Wipes current layer to spin up a entirely blank grid canvas space</td>
+                    </tr>
+                    <tr>
+                        <td><strong>/savemap [name]</strong></td>
+                        <td>Saves current map map layout files straight to local structural space</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 4: CONSOLE CHEAT SHEET -->
+        <section id="commands">
+            <h2>💻 Engine Terminal Cheat Sheet</h2>
+            <pre>
+// Server & client structural commands
+/mastermode 1         // Open status for everyone to hop in 
+/mastermode 2         // Lock veto room control rules
+/map [mapname]        // Force trigger instant map package asset loading
+/kick [clientnum]     // Drop problematic player lines instantly
+/clearbans            // Flush security structural metrics
+            </pre>
+        </section>
+
+        <footer>
+            <p>Built for gaming preservation, open play, and creative mapping learning. Assets fully tracked under original ZLIB licenses. Visit the <a href="http://sauerbraten.org/" target="_blank">Official Sauerbraten Site</a>.</p>
+        </footer>
+    </main>
+
+    <script>
+        function goFullscreen() {
+            const container = document.getElementById('arena-container');
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.mozRequestFullScreen) { /* Firefox */
+                container.mozRequestFullScreen();
+            } else if (container.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                container.webkitRequestFullscreen();
+            } else if (container.msRequestFullscreen) { /* IE/Edge */
+                container.msRequestFullscreen();
+            }
+        }
+
+        // Quick navigation active highlights
+        const links = document.querySelectorAll('nav a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                links.forEach(l => l.classList.remove('active'));
+                link.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

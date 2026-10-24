@@ -3,31 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PURE VANILLA 3D ARENA</title>
+    <title>3D LOCAL ARCARE ROOM // LIVE</title>
     <style>
-        body {
-            background-color: #0d1117;
-            color: #c9d1d9;
-            font-family: monospace;
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --accent-cyan: #00ffcc;
+            --accent-green: #39d353;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: monospace;
             padding: 2rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
-        h1 { color: #00ffcc; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #8b949e; margin-bottom: 1.5rem; }
+
+        h1 {
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
         #canvas-container {
             position: relative;
             width: 800px;
             height: 500px;
             background-color: #000;
-            border: 2px solid #30363d;
+            border: 2px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
-        canvas { width: 100%; height: 100%; display: block; }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         #crosshair {
             position: absolute;
             top: 50%; left: 50%;
@@ -36,11 +69,16 @@
             pointer-events: none;
             z-index: 5;
         }
+
         #crosshair::before, #crosshair::after {
-            content: ''; position: absolute; background-color: #00ffcc;
+            content: '';
+            position: absolute;
+            background-color: var(--accent-cyan);
         }
+
         #crosshair::before { top: 6px; left: 0; width: 14px; height: 2px; }
         #crosshair::after { top: 0; left: 6px; width: 2px; height: 14px; }
+
         #instructions {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -52,34 +90,46 @@
             cursor: pointer;
             z-index: 10;
         }
-        #instructions h2 { color: #39d353; margin-bottom: 1rem; text-transform: uppercase; }
+
+        #instructions h2 {
+            color: var(--accent-green);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .ui-panel {
             margin-top: 1rem;
             width: 800px;
             display: flex;
             justify-content: space-between;
-            color: #8b949e;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
-        .score-box { color: #39d353; font-weight: bold; }
+
+        .score-box {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
     <h1>3D Local Engine Room</h1>
-    <p>Zero external connections. 100% client-side core mathematical vector projection layout.</p>
+    <p>Zero external frame mirrors or tracking signatures. Pure localized client-side math array logic.</p>
 
     <div id="canvas-container">
         <div id="crosshair"></div>
         <div id="instructions" onclick="clickToPlay()">
             <h2>CLICK TO START GAME</h2>
-            <p>Move: W, A, S, D | Look: Mouse | Shoot: Left Click</p>
+            <p>Move: W, A, S, D | Look: Mouse Aim | Shoot: Left Click</p>
         </div>
         <canvas id="gameCanvas" width="800" height="500"></canvas>
     </div>
 
     <div class="ui-panel">
         <div>Cubes Eliminated: <span id="score" class="score-box">0</span></div>
-        <div>Engine Status: <span style="color:#00ffcc;">Pure Canvas3D Active</span></div>
+        <div>Engine Status: <span style="color: var(--accent-cyan);">Pure Canvas3D Vector Projection Active</span></div>
     </div>
 
     <script>
@@ -88,14 +138,13 @@
         const container = document.getElementById('canvas-container');
         const instructions = document.getElementById('instructions');
 
-        // Game State Variables
+        // Core 3D Transformation Math Coordinates
         let pX = 0, pZ = 0, pYaw = 0; 
         let keys = { w: false, a: false, s: false, d: false };
         let targets = [];
         let score = 0;
         let isPlaying = false;
 
-        // Initialize 3D Vector Targets straight ahead
         function initGame() {
             targets = [];
             for (let i = 0; i < 8; i++) {
@@ -112,7 +161,7 @@
             });
         }
 
-        // Input Handlers
+        // Input Lock Framework Actions
         function clickToPlay() {
             isPlaying = true;
             instructions.style.display = 'none';
@@ -149,7 +198,7 @@
         window.addEventListener('mousedown', () => {
             if (document.pointerLockElement !== container) return;
             
-            // Check crosshair collision with target centers
+            // Core Target intersection collision detector checks
             for (let i = targets.length - 1; i >= 0; i--) {
                 let t = targets[i];
                 let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
@@ -168,11 +217,10 @@
             }
         });
 
-        // Helper to project and track 3D points down to a 2D viewport
         function projectPoint(x, y, z) {
             let rotX = (x - pX) * Math.cos(pYaw) - (z - pZ) * Math.sin(pYaw);
             let rotZ = (x - pX) * Math.sin(pYaw) + (z - pZ) * Math.cos(pYaw);
-            if (rotZ >= -0.5) return null; // Behind camera protection
+            if (rotZ >= -0.5) return null; 
             return {
                 x: 400 + (rotX / -rotZ) * 400,
                 y: 250 + (y / -rotZ) * 400,
@@ -180,7 +228,6 @@
             };
         }
 
-        // Draws a real 3D solid cube side panel layout face matrix
         function drawFace(p1, p2, p3, p4, color, strokeColor) {
             if (!p1 || !p2 || !p3 || !p4) return;
             ctx.fillStyle = color;
@@ -196,63 +243,6 @@
             ctx.stroke();
         }
 
-        // 3D Engine Frame Loop Process
-        function loop() {
-            // Processing movements (W and S swapped back cleanly here)
-            let speed = 0.15;
-            if (keys.w) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
-            if (keys.s) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
-            if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
-            if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
-
-            // Clear Screen Frame
-            ctx.fillStyle = '#0a0f1d';
-            ctx.fillRect(0, 0, 800, 500);
-
-            // Draw Wireframe Floor Lines
-            ctx.strokeStyle = '#21262d';
-            ctx.lineWidth = 1;
-            for (let i = -50; i <= 50; i += 5) {
-                drawWorldLine(i, 0, -50, i, 0, 50);
-                drawWorldLine(-50, 0, i, 50, 0, i);
-            }
-
-            // Sort targets by depth so things further away render behind close things
-            targets.sort((a, b) => {
-                let distA = (a.x - pX)**2 + (a.z - pZ)**2;
-                let distB = (b.x - pX)**2 + (b.z - pZ)**2;
-                return distB - distA;
-            });
-
-            // Draw Targets as Actual Solid 3D Boxes with Depth
-            targets.forEach(t => {
-                let r = t.size / 2;
-                
-                // Track 8 corner vector calculations of the 3D box
-                let f1 = projectPoint(t.x - r,  r, t.z - r); // Front Upper Left
-                let f2 = projectPoint(t.x + r,  r, t.z - r); // Front Upper Right
-                let f3 = projectPoint(t.x + r, -r, t.z - r); // Front Lower Right
-                let f4 = projectPoint(t.x - r, -r, t.z - r); // Front Lower Left
-                
-                let b1 = projectPoint(t.x - r,  r, t.z + r); // Back Upper Left
-                let b2 = projectPoint(t.x + r,  r, t.z + r); // Back Upper Right
-                let b3 = projectPoint(t.x + r, -r, t.z + r); // Back Lower Right
-                let b4 = projectPoint(t.x - r, -r, t.z + r); // Back Lower Left
-
-                let stroke = '#00ffcc';
-
-                // Render back wall faces first, then wrap up layers forward
-                drawFace(b1, b2, b3, b4, '#1b5e20', stroke); // Back Face
-                drawFace(f1, b1, b4, f4, '#2e7d32', stroke); // Left Face
-                drawFace(f2, b2, b3, f3, '#2e7d32', stroke); // Right Face
-                drawFace(f1, f2, b2, b1, '#4caf50', stroke); // Top Face
-                drawFace(f4, f3, b3, b4, '#1b5e20', stroke); // Bottom Face
-                drawFace(f1, f2, f3, f4, '#39d353', stroke); // Front Face Face
-            });
-
-            requestAnimationFrame(loop);
-        }
-
         function drawWorldLine(x1, y1, z1, x2, y2, z2) {
             let p1 = projectPoint(x1, y1, z1);
             let p2 = projectPoint(x2, y2, z2);
@@ -260,3 +250,69 @@
             if (p1 && p2) {
                 ctx.beginPath();
                 ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            }
+        }
+
+        // Live Realtime Frame Refresh Logic Updates
+        function loop() {
+            // Speed adjustments. Forward / Backward physics fixes applied natively
+            let speed = 0.15;
+            if (keys.w) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
+            if (keys.s) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
+            if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
+            if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
+
+            // Clear Viewport Buffer
+            ctx.fillStyle = '#0a0f1d';
+            ctx.fillRect(0, 0, 800, 500);
+
+            // Draw World Ground Mapping Vectors
+            ctx.strokeStyle = '#21262d';
+            ctx.lineWidth = 1;
+            for (let i = -50; i <= 50; i += 5) {
+                drawWorldLine(i, 0, -50, i, 0, 50);
+                drawWorldLine(-50, 0, i, 50, 0, i);
+            }
+
+            // Depth index sorter organizes overlapping canvas assets
+            targets.sort((a, b) => {
+                let distA = (a.x - pX)**2 + (a.z - pZ)**2;
+                let distB = (b.x - pX)**2 + (b.z - pZ)**2;
+                return distB - distA;
+            });
+
+            // Map and draw fully shaded geometric 3D target solid cubes
+            targets.forEach(t => {
+                let r = t.size / 2;
+                
+                let f1 = projectPoint(t.x - r,  r, t.z - r); 
+                let f2 = projectPoint(t.x + r,  r, t.z - r); 
+                let f3 = projectPoint(t.x + r, -r, t.z - r); 
+                let f4 = projectPoint(t.x - r, -r, t.z - r); 
+                
+                let b1 = projectPoint(t.x - r,  r, t.z + r); 
+                let b2 = projectPoint(t.x + r,  r, t.z + r); 
+                let b3 = projectPoint(t.x + r, -r, t.z + r); 
+                let b4 = projectPoint(t.x - r, -r, t.z + r); 
+
+                let stroke = '#00ffcc';
+
+                drawFace(b1, b2, b3, b4, '#1b5e20', stroke); 
+                drawFace(f1, b1, b4, f4, '#2e7d32', stroke); 
+                drawFace(f2, b2, b3, f3, '#2e7d32', stroke); 
+                drawFace(f1, f2, b2, b1, '#4caf50', stroke); 
+                drawFace(f4, f3, b3, b4, '#1b5e20', stroke); 
+                drawFace(f1, f2, f3, f4, '#39d353', stroke); 
+            });
+
+            requestAnimationFrame(loop);
+        }
+
+        // Initialize Core Loops
+        initGame();
+        loop();
+    </script>
+</body>
+</html>

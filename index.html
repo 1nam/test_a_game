@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D CYBER ROBOT ARENA // LIVE</title>
+    <title>3D CYBER TOWN ARENA // LIVE</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -78,26 +78,26 @@
             justify-content: space-between;
             color: var(--text-muted);
         }
-        .score-box { color: var(--accent-green); font-weight: bold; font-size: 1.2rem; }
+        .score-box { color: var(--accent-green); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>3D NPC Cyber Arena</h1>
-    <p>Pure mathematical vector layout engine with dialoguing droids & score tracking.</p>
+    <h1>3D Low-Poly Town Arena</h1>
+    <p>100% self-contained untextured town architecture, composite NPCs, and secure vector tracking.</p>
 
     <div id="canvas-container">
         <div id="crosshair"></div>
         <div id="instructions" onclick="clickToPlay()">
-            <h2>CLICK TO START SECURITY SCAN</h2>
-            <p>Controls: W, A, S, D to Walk | Mouse to Look | Left Click to Core-Blast Droids</p>
+            <h2>CLICK TO ENTER TOWN</h2>
+            <p>Move: W, A, S, D | Look: Mouse | Shoot: Left Click</p>
         </div>
         <canvas id="gameCanvas" width="800" height="500"></canvas>
     </div>
 
     <div class="ui-panel">
-        <div>SCORE: <span id="score" class="score-box">0</span></div>
-        <div>System Engine: <span style="color: var(--accent-cyan);">NPC Dynamic Dialogue Layer Active</span></div>
+        <div>Droids Deactivated: <span id="score" class="score-box">0</span></div>
+        <div>Engine Status: <span style="color: var(--accent-cyan);">Solid Plane + Buildings Processing Active</span></div>
     </div>
 
     <script>
@@ -106,39 +106,55 @@
         const container = document.getElementById('canvas-container');
         const instructions = document.getElementById('instructions');
 
-        // Engine State Mapping Matrices
-        let pX = 0, pZ = 0, pYaw = 0; 
+        let pX = 0, pY = 2, pZ = 5, pYaw = 0; 
         let keys = { w: false, a: false, s: false, d: false };
         let targets = [];
+        let buildings = [];
         let score = 0;
 
-        // Dialogue Quotes List
-        const dialoguePhrases = [
+        const phrases = [
             "Beep Boop! Do not shoot!",
             "Intruder alert!",
-            "Calculating survival probability...",
             "Error: 404 Target Found",
-            "Are you testing me?",
-            "System online.",
-            "I see you!",
-            "Destroy all humans!",
-            "Do you come in peace?",
-            "Processing vectors..."
+            "Stop right there!",
+            "Scanning area...",
+            "System online."
         ];
 
         function initGame() {
             targets = [];
-            for (let i = 0; i < 8; i++) { spawnDroid(); }
+            buildings = [];
+
+            let bConfigs = [
+                {x: -12, z: -15, w: 6, h: 12, d: 6},
+                {x: 12, z: -18, w: 5, h: 10, d: 5},
+                {x: -15, z: -35, w: 8, h: 16, d: 8},
+                {x: 15, z: -30, w: 7, h: 14, d: 7},
+                {x: -8, z: -50, w: 6, h: 10, d: 6},
+                {x: 8, z: -55, w: 5, h: 12, d: 5},
+                {x: -25, z: -20, w: 6, h: 8, d: 6},
+                {x: 25, z: -25, w: 6, h: 9, d: 6}
+            ];
+
+            bConfigs.forEach(b => {
+                buildings.push({ x: b.x, y: b.h/2, z: b.z, w: b.w, h: b.h, d: b.d });
+            });
+
+            for (let i = 0; i < 6; i++) { 
+                spawnDroid(); 
+            }
         }
 
         function spawnDroid() {
             targets.push({
-                x: (Math.random() - 0.5) * 35,
-                z: -(Math.random() * 25 + 10),
-                size: 2,
-                color: '#39d353',
-                phrase: dialoguePhrases[Math.floor(Math.random() * dialoguePhrases.length)],
-                phraseTimer: Math.random() * 200 + 100 // frames before changing phrase
+                x: (Math.random() - 0.5) * 20,
+                z: -(Math.random() * 30 + 10),
+                w: 1.5,
+                h: 2.5,
+                d: 1.5,
+                color: '#2e7d32',
+                phrase: phrases[Math.floor(Math.random() * phrases.length)],
+                phraseTimer: Math.random() * 100
             });
         }
 
@@ -174,7 +190,6 @@
         window.addEventListener('mousedown', () => {
             if (document.pointerLockElement !== container) return;
             
-            // Hitscan Raycast checks target collisions 
             for (let i = targets.length - 1; i >= 0; i--) {
                 let t = targets[i];
                 let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
@@ -182,7 +197,8 @@
 
                 if (rotZ < 0) {
                     let screenX = 400 + (rotX / -rotZ) * 400;
-                    if (Math.abs(screenX - 400) < (t.size * 1.2 / -rotZ) * 400) {
+                    let targetSizeOnScreen = (t.w / -rotZ) * 400;
+                    if (Math.abs(screenX - 400) < targetSizeOnScreen) {
                         targets.splice(i, 1);
                         score++;
                         document.getElementById('score').innerText = score;
@@ -196,10 +212,11 @@
         function projectPoint(x, y, z) {
             let rotX = (x - pX) * Math.cos(pYaw) - (z - pZ) * Math.sin(pYaw);
             let rotZ = (x - pX) * Math.sin(pYaw) + (z - pZ) * Math.cos(pYaw);
-            if (rotZ >= -0.3) return null; 
+            let rotY = y - pY;
+            if (rotZ >= -0.2) return null; 
             return {
                 x: 400 + (rotX / -rotZ) * 400,
-                y: 250 + (y / -rotZ) * 400,
+                y: 250 + (rotY / -rotZ) * 400,
                 depth: rotZ
             };
         }
@@ -219,99 +236,121 @@
             ctx.stroke();
         }
 
-        function drawWorldLine(x1, y1, z1, x2, y2, z2) {
-            let p1 = projectPoint(x1, y1, z1);
-            let p2 = projectPoint(x2, y2, z2);
-            if (p1 && p2) {
-                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-            }
+        function renderSolidBox(x, y, z, w, h, d, fillColors, strokeColor) {
+            let xw = w / 2, yh = h / 2, zd = d / 2;
+
+            let f1 = projectPoint(x - xw, y + yh, z - zd);
+            let f2 = projectPoint(x + xw, y + yh, z - zd);
+            let f3 = projectPoint(x + xw, y - yh, z - zd);
+            let f4 = projectPoint(x - xw, y - yh, z - zd);
+
+            let b1 = projectPoint(x - xw, y + yh, z + zd);
+            let b2 = projectPoint(x + xw, y + yh, z + zd);
+            let b3 = projectPoint(x + xw, y - yh, z + zd);
+            let b4 = projectPoint(x - xw, y - yh, z + zd);
+
+            drawFace(b1, b2, b3, b4, fillColors.back || fillColors.main, strokeColor);
+            drawFace(f1, b1, b4, f4, fillColors.left || fillColors.main, strokeColor);
+            drawFace(f2, b2, b3, f3, fillColors.right || fillColors.main, strokeColor);
+            drawFace(f1, f2, b2, b1, fillColors.top || fillColors.main, strokeColor);
+            drawFace(f4, f3, b3, b4, fillColors.bottom || fillColors.main, strokeColor);
+            drawFace(f1, f2, f3, f4, fillColors.front || fillColors.main, strokeColor);
         }
 
         function loop() {
-            // Movement updates - Native natural directions tracking
             let speed = 0.15;
             if (keys.w) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
             if (keys.s) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
             if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
             if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
 
-            // Clear Scene frame buffer
             ctx.fillStyle = '#0a0f1d';
             ctx.fillRect(0, 0, 800, 500);
 
-            // Draw World Ground Lines Matrix Grid
+            ctx.fillStyle = '#161b22';
+            ctx.fillRect(0, 250, 800, 250); 
+
             ctx.strokeStyle = '#21262d';
             ctx.lineWidth = 1;
-            for (let i = -60; i <= 60; i += 6) {
-                drawWorldLine(i, 0, -60, i, 0, 60);
-                drawWorldLine(-60, 0, i, 60, 0, i);
+            for (let i = -60; i <= 60; i += 4) {
+                let p1 = projectPoint(i, 0, -60);
+                let p2 = projectPoint(i, 0, 60);
+                if (p1 && p2) { ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke(); }
+
+                let p3 = projectPoint(-60, 0, i);
+                let p4 = projectPoint(60, 0, i);
+                if (p3 && p4) { ctx.beginPath(); ctx.moveTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.stroke(); }
             }
 
-            // Depth sorting tracks order of rendering layers cleanly
-            targets.sort((a, b) => {
-                return ((b.x - pX)**2 + (b.z - pZ)**2) - ((a.x - pX)**2 + (a.z - pZ)**2);
+            let renderList = [];
+            
+            buildings.forEach(b => {
+                let dist = (b.x - pX)**2 + (b.z - pZ)**2;
+                renderList.push({ type: 'building', data: b, dist: dist });
             });
 
-            // Draw Composite 3D Robot Shapes
             targets.forEach(t => {
-                let r = t.size / 2;
-                let heightOffset = 0.5;
+                let dist = (t.x - pX)**2 + (t.z - pZ)**2;
+                renderList.push({ type: 'droid', data: t, dist: dist });
+            });
 
-                // Cycle NPC text phrases down smoothly
-                t.phraseTimer--;
-                if(t.phraseTimer <= 0) {
-                    t.phrase = dialoguePhrases[Math.floor(Math.random() * dialoguePhrases.length)];
-                    t.phraseTimer = Math.random() * 200 + 100;
-                }
+            renderList.sort((a, b) => b.dist - a.dist);
 
-                // Build 3D Droid Body Box Matrix Coordinates
-                let f1 = projectPoint(t.x - r, heightOffset + r, t.z - r); 
-                let f2 = projectPoint(t.x + r, heightOffset + r, t.z - r); 
-                let f3 = projectPoint(t.x + r, heightOffset - r, t.z - r); 
-                let f4 = projectPoint(t.x - r, heightOffset - r, t.z - r); 
-                
-                let b1 = projectPoint(t.x - r, heightOffset + r, t.z + r); 
-                let b2 = projectPoint(t.x + r, heightOffset + r, t.z + r); 
-                let b3 = projectPoint(t.x + r, heightOffset - r, t.z + r); 
-                let b4 = projectPoint(t.x - r, heightOffset - r, t.z + r); 
+            renderList.forEach(item => {
+                if (item.type === 'building') {
+                    let b = item.data;
+                    renderSolidBox(b.x, b.y, b.z, b.w, b.h, b.d, {
+                        main: '#2d333b', top: '#3c444d', front: '#2d333b', left: '#22272e', right: '#22272e'
+                    }, '#444c56');
+                } 
+                else if (item.type === 'droid') {
+                    let t = item.data;
+                    
+                    let bodyY = t.h / 2; 
+                    renderSolidBox(t.x, bodyY, t.z, t.w, t.h, t.d, {
+                        main: '#2e7d32', top: '#4caf50', front: '#39d353'
+                    }, '#00ffcc');
 
-                let stroke = '#00ffcc';
+                    let sphereRadiusVal = 0.4;
+                    let headY = t.h + sphereRadiusVal; 
+                    let headCenter = projectPoint(t.x, headY, t.z);
 
-                // Render Cube body layers
-                drawFace(b1, b2, b3, b4, '#1b5e20', stroke); 
-                drawFace(f1, b1, b4, f4, '#2e7d32', stroke); 
-                drawFace(f2, b2, b3, f3, '#2e7d32', stroke); 
-                drawFace(f1, f2, b2, b1, '#4caf50', stroke); 
-                drawFace(f4, f3, b3, b4, '#1b5e20', stroke); 
-                drawFace(f1, f2, f3, f4, '#39d353', stroke);
+                    if (headCenter) {
+                        let sRadiusOnScreen = (sphereRadiusVal / -headCenter.depth) * 400;
 
-                // --- NATIVE 3D SPHERE HEAD ATTACHMENT NODE ---
-                let headY = heightOffset + r + 0.4; 
-                let headCenter = projectPoint(t.x, headY, t.z);
+                        if (sRadiusOnScreen > 1) {
+                            ctx.beginPath();
+                            ctx.arc(headCenter.x, headCenter.y, sRadiusOnScreen, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#00ffcc';
+                            ctx.fill();
+                            ctx.strokeStyle = '#ffffff';
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
 
-                if (headCenter) {
-                    let sphereRadius = (0.55 / -headCenter.depth) * 400;
+                            ctx.beginPath();
+                            ctx.arc(headCenter.x, headCenter.y, sRadiusOnScreen * 0.3, 0, 2 * Math.PI);
+                            ctx.fillStyle = '#ff3366';
+                            ctx.fill();
+                        }
+                    }
 
-                    if (sphereRadius > 1) {
-                        ctx.beginPath();
-                        ctx.arc(headCenter.x, headCenter.y, sphereRadius, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#00ffcc';
-                        ctx.fill();
-                        ctx.strokeStyle = '#ffffff';
-                        ctx.lineWidth = 1.5;
-                        ctx.stroke();
-
-                        // Tiny neon scanning tracking focal red pupil point
-                        ctx.beginPath();
-                        ctx.arc(headCenter.x, headCenter.y, sphereRadius * 0.3, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#ff3366';
-                        ctx.fill();
-
-                        // --- DYNAMIC DIALOGUE BUBBLE TEXT ---
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = Math.max(10, Math.min(14, 12 / -headCenter.depth * 10)) + 'px monospace';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(t.phrase, headCenter.x, headCenter.y - sphereRadius - 10);
+                    t.phraseTimer += 0.5;
+                    if (Math.sin(t.phraseTimer / 15) > 0.3) {
+                        let textPos = projectPoint(t.x, headY + 0.8, t.z);
+                        if (textPos) {
+                            ctx.font = 'bold 11px monospace';
+                            ctx.fillStyle = '#ffffff';
+                            ctx.textAlign = 'center';
+                            
+                            let textWidth = ctx.measureText(t.phrase).width;
+                            ctx.fillStyle = 'rgba(13, 17, 23, 0.85)';
+                            ctx.fillRect(textPos.x - textWidth/2 - 6, textPos.y - 12, textWidth + 12, 18);
+                            ctx.strokeStyle = '#00ffcc';
+                            ctx.strokeRect(textPos.x - textWidth/2 - 6, textPos.y - 12, textWidth + 12, 18);
+                            
+                            ctx.fillStyle = '#00ffcc';
+                            ctx.fillText(t.phrase, textPos.x, textPos.y);
+                        }
                     }
                 }
             });

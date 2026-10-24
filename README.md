@@ -4,7 +4,7 @@ A fast, lightweight, and completely open-source single-page static arcade and ed
 
 Play the game instantly in your browser via WebGL2/WebAssembly, learn real-time cooperative map editing shortcuts, and access essential server commands.
 
-Live Demo: [ )
+Live Demo: [https://1nam.github.io/test_a_game/)
 
 ---
 

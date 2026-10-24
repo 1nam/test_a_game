@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D OPEN SOURCE WEB ARENA</title>
+    <title>PURE VANILLA 3D ARENA</title>
     <style>
         body {
             background-color: #0d1117;
@@ -31,7 +31,7 @@
         #crosshair {
             position: absolute;
             top: 50%; left: 50%;
-            width: 10px; height: 10px;
+            width: 14px; height: 14px;
             transform: translate(-50%, -50%);
             pointer-events: none;
             z-index: 5;
@@ -39,171 +39,205 @@
         #crosshair::before, #crosshair::after {
             content: ''; position: absolute; background-color: #00ffcc;
         }
-        #crosshair::before { top: 4px; left: -5px; width: 20px; height: 2px; }
-        #crosshair::after { top: -5px; left: 4px; width: 2px; height: 20px; }
+        #crosshair::before { top: 6px; left: 0; width: 14px; height: 2px; }
+        #crosshair::after { top: 0; left: 6px; width: 2px; height: 14px; }
         #instructions {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 17, 23, 0.9);
+            background: rgba(13, 17, 23, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10;
-            transition: opacity 0.2s ease;
         }
-        #instructions h2 { color: #39d353; margin-bottom: 1rem; }
+        #instructions h2 { color: #39d353; margin-bottom: 1rem; text-transform: uppercase; }
+        .ui-panel {
+            margin-top: 1rem;
+            width: 800px;
+            display: flex;
+            justify-content: space-between;
+            color: #8b949e;
+        }
         .score-box { color: #39d353; font-weight: bold; }
     </style>
-    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
-    <h1>3D Browser Arcade Room</h1>
-    <p>Zero dead frames. Locally rendered client-side Javascript 3D engine gameplay.</p>
+    <h1>3D Local Engine Room</h1>
+    <p>Zero external connections. 100% client-side core mathematical vector projection layout.</p>
 
     <div id="canvas-container">
         <div id="crosshair"></div>
-        <div id="instructions" onclick="startGame()">
-            <h2>CLICK HERE TO PLAY</h2>
-            <p>W, A, S, D to Move | Mouse to Look Around | Click to Shoot Green Targets</p>
+        <div id="instructions" onclick="clickToPlay()">
+            <h2>CLICK TO START GAME</h2>
+            <p>Move: W, A, S, D | Look: Mouse | Shoot: Left Click</p>
         </div>
-        <canvas id="gameCanvas"></canvas>
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
     </div>
 
-    <div style="margin-top: 1rem; width: 800px; display: flex; justify-content: space-between;">
-        <div>Targets Defeated: <span id="score" class="score-box">0</span></div>
-        <div>System Engine: <span style="color:#00ffcc;">Active (WebGL)</span></div>
+    <div class="ui-panel">
+        <div>Cubes Eliminated: <span id="score" class="score-box">0</span></div>
+        <div>Engine Status: <span style="color:#00ffcc;">Pure Canvas3D Active</span></div>
     </div>
 
     <script>
-        let scene, camera, renderer, moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let prevTime = performance.now();
-        const velocity = new THREE.Vector3(), direction = new THREE.Vector3();
-        let targets = [], score = 0;
-
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
         const instructions = document.getElementById('instructions');
 
-        function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0f1d);
+        // Game State Variables
+        let pX = 0, pZ = 0, pYaw = 0; 
+        let keys = { w: false, a: false, s: false, d: false };
+        let targets = [];
+        let score = 0;
+        let isPlaying = false;
 
-            camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
-            camera.position.set(0, 2, 5);
+        // Initialize 3D Vector Targets straight ahead
+        function initGame() {
+            targets = [];
+            for (let i = 0; i < 8; i++) {
+                spawnCube();
+            }
+        }
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-            scene.add(ambientLight);
+        function spawnCube() {
+            targets.push({
+                x: (Math.random() - 0.5) * 30,
+                z: -(Math.random() * 25 + 10),
+                size: 2,
+                color: '#39d353'
+            });
+        }
+
+        // Input Handlers
+        function clickToPlay() {
+            isPlaying = true;
+            instructions.style.display = 'none';
+            container.requestPointerLock();
+        }
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement !== container) {
+                instructions.style.display = 'flex';
+                isPlaying = false;
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW') keys.w = true;
+            if (e.code === 'KeyA') keys.a = true;
+            if (e.code === 'KeyS') keys.s = true;
+            if (e.code === 'KeyD') keys.d = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyW') keys.w = false;
+            if (e.code === 'KeyA') keys.a = false;
+            if (e.code === 'KeyS') keys.s = false;
+            if (e.code === 'KeyD') keys.d = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (document.pointerLockElement === container) {
+                pYaw -= e.movementX * 0.003;
+            }
+        });
+
+        window.addEventListener('mousedown', () => {
+            if (document.pointerLockElement !== container) return;
             
-            const dirLight = new THREE.DirectionalLight(0x00ffcc, 0.8);
-            dirLight.position.set(1, 1, 1).normalize();
-            scene.add(dirLight);
+            // Check crosshair collision with target centers
+            for (let i = targets.length - 1; i >= 0; i--) {
+                let t = targets[i];
+                // Translate
+                let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
+                let rotZ = (t.x - pX) * Math.sin(pYaw) + (t.z - pZ) * Math.cos(pYaw);
 
-            const gridHelper = new THREE.GridHelper(100, 50, 0x30363d, 0x00ffcc);
-            scene.add(gridHelper);
+                if (rotZ < 0) {
+                    let screenX = 400 + (rotX / -rotZ) * 400;
+                    // Check if center screen crosshair matches target boundaries
+                    if (Math.abs(screenX - 400) < (t.size / -rotZ) * 400) {
+                        targets.splice(i, 1);
+                        score++;
+                        document.getElementById('score').innerText = score;
+                        spawnCube();
+                        break;
+                    }
+                }
+            }
+        });
 
-            // Spawn static starter targets safely
-            spawnTarget(0, 2, -15);
-            spawnTarget(-5, 2, -20);
-            spawnTarget(5, 2, -25);
+        // 3D Engine Frame Loop Process
+        function loop() {
+            // Processing movements
+            let speed = 0.15;
+            if (keys.w) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
+            if (keys.s) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
+            if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
+            if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
 
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
-            renderer.setSize(800, 500);
+            // Clear Screen Frame
+            ctx.fillStyle = '#0a0f1d';
+            ctx.fillRect(0, 0, 800, 500);
 
-            document.addEventListener('keydown', (e) => handleKey(e, true));
-            document.addEventListener('keyup', (e) => handleKey(e, false));
-            document.addEventListener('mousemove', handleAim);
-            window.addEventListener('mousedown', handleFire);
+            // Draw Wireframe Floor Lines
+            ctx.strokeStyle = '#21262d';
+            ctx.lineWidth = 1;
+            for (let i = -50; i <= 50; i += 5) {
+                drawWorldLine(i, 0, -50, i, 0, 50);
+                drawWorldLine(-50, 0, i, 50, 0, i);
+            }
 
-            document.addEventListener('pointerlockchange', () => {
-                if (document.pointerLockElement === container) {
-                    instructions.style.display = 'none';
-                } else {
-                    instructions.style.display = 'flex';
+            // Draw Core 3D Objects
+            targets.forEach(t => {
+                // Render matrix coordinates transformation
+                let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
+                let rotZ = (t.x - pX) * Math.sin(pYaw) + (t.z - pZ) * Math.cos(pYaw);
+
+                if (rotZ < -1) {
+                    let sz = (t.size / -rotZ) * 400;
+                    let sx = 400 + (rotX / -rotZ) * 400;
+                    let sy = 250;
+
+                    // Rendering Solid Object Layer
+                    ctx.fillStyle = t.color;
+                    ctx.fillRect(sx - sz/2, sy - sz, sz, sz * 2);
+                    
+                    // Highlight Borders
+                    ctx.strokeStyle = '#00ffcc';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(sx - sz/2, sy - sz, sz, sz * 2);
                 }
             });
 
-            animate();
+            requestAnimationFrame(loop);
         }
 
-        function spawnTarget(x, y, z) {
-            const geo = new THREE.BoxGeometry(2, 4, 2);
-            const mat = new THREE.MeshLambertMaterial({ color: 0x39d353 });
-            const targetMesh = new THREE.Mesh(geo, mat);
-            
-            targetMesh.position.x = x !== undefined ? x : (Math.random() - 0.5) * 40;
-            targetMesh.position.y = y !== undefined ? y : 2;
-            targetMesh.position.z = z !== undefined ? z : -(Math.random() * 30 + 10);
-            
-            scene.add(targetMesh);
-            targets.push(targetMesh);
-            return targetMesh;
-        }
+        function drawWorldLine(x1, y1, z1, x2, y2, z2) {
+            let rx1 = (x1 - pX) * Math.cos(pYaw) - (z1 - pZ) * Math.sin(pYaw);
+            let rz1 = (x1 - pX) * Math.sin(pYaw) + (z1 - pZ) * Math.cos(pYaw);
+            let rx2 = (x2 - pX) * Math.cos(pYaw) - (z2 - pZ) * Math.sin(pYaw);
+            let rz2 = (x2 - pX) * Math.sin(pYaw) + (z2 - pZ) * Math.cos(pYaw);
 
-        function startGame() { 
-            // Try capturing the mouse cursor
-            container.requestPointerLock();
-            // Failsafe: hide overlay layout instantly even if browser blocks lock feature
-            instructions.style.display = 'none';
-        }
+            if (rz1 < -1 && rz2 < -1) {
+                let sx1 = 400 + (rx1 / -rz1) * 400;
+                let sy1 = 250 + (y1 / -rz1) * 400;
+                let sx2 = 400 + (rx2 / -rz2) * 400;
+                let sy2 = 250 + (y2 / -rz2) * 400;
 
-        function handleAim(e) {
-            if (document.pointerLockElement !== container) return;
-            camera.rotation.y -= e.movementX * 0.0025;
-            camera.rotation.x -= e.movementY * 0.0025;
-            camera.rotation.x = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, camera.rotation.x));
-        }
-
-        function handleKey(e, isDown) {
-            if (e.code === 'KeyW') moveForward = isDown;
-            if (e.code === 'KeyS') moveBackward = isDown;
-            if (e.code === 'KeyA') moveLeft = isDown;
-            if (e.code === 'KeyD') moveRight = isDown;
-        }
-
-        function handleFire() {
-            if (document.pointerLockElement !== container) return;
-            
-            const raycaster = new THREE.Raycaster();
-            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-            
-            const intersects = raycaster.intersectObjects(targets);
-            if (intersects.length > 0) {
-                const hit = intersects[0].object; // Target indexed collection item array selection
-                scene.remove(hit);
-                targets = targets.filter(t => t !== hit);
-                score++;
-                document.getElementById('score').innerText = score;
-                spawnTarget(); 
+                ctx.beginPath();
+                ctx.moveTo(sx1, sy1);
+                ctx.lineTo(sx2, sy2);
+                ctx.stroke();
             }
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (document.pointerLockElement === container) {
-                const time = performance.now();
-                const delta = (time - prevTime) / 1000;
-
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
-
-                direction.z = Number(moveForward) - Number(moveBackward);
-                direction.x = Number(moveRight) - Number(moveLeft);
-                direction.normalize();
-
-                if (moveForward || moveBackward) velocity.z -= direction.z * 200.0 * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * 200.0 * delta;
-
-                camera.translateX(-velocity.x * delta);
-                camera.translateZ(velocity.z * delta);
-                camera.position.y = 2;
-                prevTime = time;
-            }
-            renderer.render(scene, camera);
-        }
-
-        window.onload = init;
+        // Initialize Core System Execution Loops
+        initGame();
+        loop();
     </script>
 </body>
 </html>

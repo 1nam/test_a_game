@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CUBE 2: SAUERBRATEN // ARCADE</title>
+    <title>CUBE 2: SAUERBRATEN // ARCADE PLAYROOM</title>
     <style>
         body {
             background-color: #0d1117;
@@ -66,9 +66,6 @@
             color: #8b949e;
             text-align: left;
         }
-        .tip strong {
-            color: #39d353;
-        }
         .btn {
             background-color: transparent;
             color: #00ffcc;
@@ -85,6 +82,15 @@
             background-color: #00ffcc;
             color: #0d1117;
             box-shadow: 0 0 12px rgba(0, 255, 204, 0.4);
+        }
+        .btn-alt {
+            color: #39d353;
+            border-color: #39d353;
+        }
+        .btn-alt:hover {
+            background-color: #39d353;
+            color: #0d1117;
+            box-shadow: 0 0 12px rgba(57, 211, 83, 0.4);
         }
         pre {
             background-color: #05070a;
@@ -107,16 +113,19 @@
         <p>Pure open-source 3D arena action running straight inside your browser web canvas.</p>
         
         <div class="game-box">
-            <!-- Cache-busting URL parameter forces the browser to drop the old block list immediately -->
             <div class="iframe-container" id="arenaFrameContainer">
-                <iframe src="https://github.io" allow="fullscreen; pointer-lock"></iframe>
+                <!-- Server client alpha layer layout portal -->
+                <iframe id="gameRenderFrame" src="https://github.io" allow="fullscreen; pointer-lock"></iframe>
             </div>
             
             <div class="controls-bar">
                 <div class="tip">
-                    💡 <strong>Pointer Capture:</strong> Click inside the screen space to lock mouse cursor aim. Press <strong>ESC</strong> to unlock.
+                    💡 <strong>Pointer Capture:</strong> Click inside the engine screen space to lock aim vectors. Press <strong>ESC</strong> to drop out.
                 </div>
-                <button class="btn" onclick="triggerFullscreen()">FULLSCREEN MODE</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-alt" onclick="switchEngine()">SWITCH TO ENGINE MIRROR B</button>
+                    <button class="btn" onclick="triggerFullscreen()">FULLSCREEN MODE</button>
+                </div>
             </div>
         </div>
 
@@ -137,6 +146,12 @@
             else if (frame.mozRequestFullScreen) { frame.mozRequestFullScreen(); }
             else if (frame.webkitRequestFullscreen) { frame.webkitRequestFullscreen(); }
             else if (frame.msRequestFullscreen) { frame.msRequestFullscreen(); }
+        }
+
+        function switchEngine() {
+            const frame = document.getElementById('gameRenderFrame');
+            // If server client mirror A feels stuck or throttled, flip immediately to engine target layer assembly B
+            frame.src = "https://github.io";
         }
     </script>
 </body>

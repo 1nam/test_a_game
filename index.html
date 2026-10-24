@@ -51,6 +51,7 @@
             justify-content: center;
             cursor: pointer;
             z-index: 10;
+            transition: opacity 0.2s ease;
         }
         #instructions h2 { color: #39d353; margin-bottom: 1rem; }
         .score-box { color: #39d353; font-weight: bold; }
@@ -64,7 +65,7 @@
 
     <div id="canvas-container">
         <div id="crosshair"></div>
-        <div id="instructions" onclick="lockPointer()">
+        <div id="instructions" onclick="startGame()">
             <h2>CLICK HERE TO PLAY</h2>
             <p>W, A, S, D to Move | Mouse to Look Around | Click to Shoot Green Targets</p>
         </div>
@@ -90,7 +91,7 @@
             scene.background = new THREE.Color(0x0a0f1d);
 
             camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
-            camera.position.set(0, 2, 5); // Position player back slightly
+            camera.position.set(0, 2, 5);
 
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
@@ -99,14 +100,13 @@
             dirLight.position.set(1, 1, 1).normalize();
             scene.add(dirLight);
 
-            // Visible grid floor
             const gridHelper = new THREE.GridHelper(100, 50, 0x30363d, 0x00ffcc);
             scene.add(gridHelper);
 
-            // Spawn initial visible targets straight ahead
+            // Spawn static starter targets safely
             spawnTarget(0, 2, -15);
             spawnTarget(-5, 2, -20);
-            box = spawnTarget(5, 2, -25);
+            spawnTarget(5, 2, -25);
 
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
             renderer.setSize(800, 500);
@@ -130,19 +130,23 @@
         function spawnTarget(x, y, z) {
             const geo = new THREE.BoxGeometry(2, 4, 2);
             const mat = new THREE.MeshLambertMaterial({ color: 0x39d353 });
-            const box = new THREE.Mesh(geo, mat);
+            const targetMesh = new THREE.Mesh(geo, mat);
             
-            // If parameters aren't passed, randomize positioning parameters safely
-            box.position.x = x !== undefined ? x : (Math.random() - 0.5) * 40;
-            box.position.y = y !== undefined ? y : 2;
-            box.position.z = z !== undefined ? z : -(Math.random() * 30 + 10);
+            targetMesh.position.x = x !== undefined ? x : (Math.random() - 0.5) * 40;
+            targetMesh.position.y = y !== undefined ? y : 2;
+            targetMesh.position.z = z !== undefined ? z : -(Math.random() * 30 + 10);
             
-            scene.add(box);
-            targets.push(box);
-            return box;
+            scene.add(targetMesh);
+            targets.push(targetMesh);
+            return targetMesh;
         }
 
-        function lockPointer() { container.requestPointerLock(); }
+        function startGame() { 
+            // Try capturing the mouse cursor
+            container.requestPointerLock();
+            // Failsafe: hide overlay layout instantly even if browser blocks lock feature
+            instructions.style.display = 'none';
+        }
 
         function handleAim(e) {
             if (document.pointerLockElement !== container) return;
@@ -166,12 +170,12 @@
             
             const intersects = raycaster.intersectObjects(targets);
             if (intersects.length > 0) {
-                const hit = intersects[0].object; // Fixed array target element matching node
+                const hit = intersects[0].object; // Target indexed collection item array selection
                 scene.remove(hit);
                 targets = targets.filter(t => t !== hit);
                 score++;
                 document.getElementById('score').innerText = score;
-                spawnTarget(); // Spawns next structural asset box
+                spawnTarget(); 
             }
         }
 

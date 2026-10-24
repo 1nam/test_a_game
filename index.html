@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D LOCAL ARCARE ROOM // LIVE</title>
+    <title>3D CYBER ROBOT ARENA // LIVE</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -15,11 +15,7 @@
             --border-color: #30363d;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: var(--bg-color);
@@ -32,17 +28,8 @@
             min-height: 100vh;
         }
 
-        h1 {
-            color: var(--accent-cyan);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        p {
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
-        }
+        h1 { color: var(--accent-cyan); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        p { color: var(--text-muted); margin-bottom: 1.5rem; }
 
         #canvas-container {
             position: relative;
@@ -55,11 +42,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
 
-        canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
+        canvas { width: 100%; height: 100%; display: block; }
 
         #crosshair {
             position: absolute;
@@ -69,13 +52,9 @@
             pointer-events: none;
             z-index: 5;
         }
-
         #crosshair::before, #crosshair::after {
-            content: '';
-            position: absolute;
-            background-color: var(--accent-cyan);
+            content: ''; position: absolute; background-color: var(--accent-cyan);
         }
-
         #crosshair::before { top: 6px; left: 0; width: 14px; height: 2px; }
         #crosshair::after { top: 0; left: 6px; width: 2px; height: 14px; }
 
@@ -90,13 +69,7 @@
             cursor: pointer;
             z-index: 10;
         }
-
-        #instructions h2 {
-            color: var(--accent-green);
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        #instructions h2 { color: var(--accent-green); margin-bottom: 1rem; text-transform: uppercase; }
 
         .ui-panel {
             margin-top: 1rem;
@@ -104,32 +77,27 @@
             display: flex;
             justify-content: space-between;
             color: var(--text-muted);
-            font-size: 0.95rem;
         }
-
-        .score-box {
-            color: var(--accent-green);
-            font-weight: bold;
-        }
+        .score-box { color: var(--accent-green); font-weight: bold; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-    <h1>3D Local Engine Room</h1>
-    <p>Zero external frame mirrors or tracking signatures. Pure localized client-side math array logic.</p>
+    <h1>3D NPC Cyber Arena</h1>
+    <p>Pure mathematical vector layout engine with dialoguing droids & score tracking.</p>
 
     <div id="canvas-container">
         <div id="crosshair"></div>
         <div id="instructions" onclick="clickToPlay()">
-            <h2>CLICK TO START GAME</h2>
-            <p>Move: W, A, S, D | Look: Mouse Aim | Shoot: Left Click</p>
+            <h2>CLICK TO START SECURITY SCAN</h2>
+            <p>Controls: W, A, S, D to Walk | Mouse to Look | Left Click to Core-Blast Droids</p>
         </div>
         <canvas id="gameCanvas" width="800" height="500"></canvas>
     </div>
 
     <div class="ui-panel">
-        <div>Cubes Eliminated: <span id="score" class="score-box">0</span></div>
-        <div>Engine Status: <span style="color: var(--accent-cyan);">Pure Canvas3D Vector Projection Active</span></div>
+        <div>SCORE: <span id="score" class="score-box">0</span></div>
+        <div>System Engine: <span style="color: var(--accent-cyan);">NPC Dynamic Dialogue Layer Active</span></div>
     </div>
 
     <script>
@@ -138,32 +106,43 @@
         const container = document.getElementById('canvas-container');
         const instructions = document.getElementById('instructions');
 
-        // Core 3D Transformation Math Coordinates
+        // Engine State Mapping Matrices
         let pX = 0, pZ = 0, pYaw = 0; 
         let keys = { w: false, a: false, s: false, d: false };
         let targets = [];
         let score = 0;
-        let isPlaying = false;
+
+        // Dialogue Quotes List
+        const dialoguePhrases = [
+            "Beep Boop! Do not shoot!",
+            "Intruder alert!",
+            "Calculating survival probability...",
+            "Error: 404 Target Found",
+            "Are you testing me?",
+            "System online.",
+            "I see you!",
+            "Destroy all humans!",
+            "Do you come in peace?",
+            "Processing vectors..."
+        ];
 
         function initGame() {
             targets = [];
-            for (let i = 0; i < 8; i++) {
-                spawnCube();
-            }
+            for (let i = 0; i < 8; i++) { spawnDroid(); }
         }
 
-        function spawnCube() {
+        function spawnDroid() {
             targets.push({
-                x: (Math.random() - 0.5) * 30,
+                x: (Math.random() - 0.5) * 35,
                 z: -(Math.random() * 25 + 10),
                 size: 2,
-                color: '#39d353'
+                color: '#39d353',
+                phrase: dialoguePhrases[Math.floor(Math.random() * dialoguePhrases.length)],
+                phraseTimer: Math.random() * 200 + 100 // frames before changing phrase
             });
         }
 
-        // Input Lock Framework Actions
         function clickToPlay() {
-            isPlaying = true;
             instructions.style.display = 'none';
             container.requestPointerLock();
         }
@@ -171,7 +150,6 @@
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement !== container) {
                 instructions.style.display = 'flex';
-                isPlaying = false;
             }
         });
 
@@ -190,15 +168,13 @@
         });
 
         window.addEventListener('mousemove', (e) => {
-            if (document.pointerLockElement === container) {
-                pYaw -= e.movementX * 0.003;
-            }
+            if (document.pointerLockElement === container) { pYaw -= e.movementX * 0.003; }
         });
 
         window.addEventListener('mousedown', () => {
             if (document.pointerLockElement !== container) return;
             
-            // Core Target intersection collision detector checks
+            // Hitscan Raycast checks target collisions 
             for (let i = targets.length - 1; i >= 0; i--) {
                 let t = targets[i];
                 let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
@@ -206,11 +182,11 @@
 
                 if (rotZ < 0) {
                     let screenX = 400 + (rotX / -rotZ) * 400;
-                    if (Math.abs(screenX - 400) < (t.size / -rotZ) * 400) {
+                    if (Math.abs(screenX - 400) < (t.size * 1.2 / -rotZ) * 400) {
                         targets.splice(i, 1);
                         score++;
                         document.getElementById('score').innerText = score;
-                        spawnCube();
+                        spawnDroid();
                         break;
                     }
                 }
@@ -220,7 +196,7 @@
         function projectPoint(x, y, z) {
             let rotX = (x - pX) * Math.cos(pYaw) - (z - pZ) * Math.sin(pYaw);
             let rotZ = (x - pX) * Math.sin(pYaw) + (z - pZ) * Math.cos(pYaw);
-            if (rotZ >= -0.5) return null; 
+            if (rotZ >= -0.3) return null; 
             return {
                 x: 400 + (rotX / -rotZ) * 400,
                 y: 250 + (y / -rotZ) * 400,
@@ -246,71 +222,103 @@
         function drawWorldLine(x1, y1, z1, x2, y2, z2) {
             let p1 = projectPoint(x1, y1, z1);
             let p2 = projectPoint(x2, y2, z2);
-
             if (p1 && p2) {
-                ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
             }
         }
 
-        // Live Realtime Frame Refresh Logic Updates
         function loop() {
-            // Speed adjustments. Forward / Backward physics fixes applied natively
+            // Movement updates - Native natural directions tracking
             let speed = 0.15;
             if (keys.w) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
             if (keys.s) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
             if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
             if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
 
-            // Clear Viewport Buffer
+            // Clear Scene frame buffer
             ctx.fillStyle = '#0a0f1d';
             ctx.fillRect(0, 0, 800, 500);
 
-            // Draw World Ground Mapping Vectors
+            // Draw World Ground Lines Matrix Grid
             ctx.strokeStyle = '#21262d';
             ctx.lineWidth = 1;
-            for (let i = -50; i <= 50; i += 5) {
-                drawWorldLine(i, 0, -50, i, 0, 50);
-                drawWorldLine(-50, 0, i, 50, 0, i);
+            for (let i = -60; i <= 60; i += 6) {
+                drawWorldLine(i, 0, -60, i, 0, 60);
+                drawWorldLine(-60, 0, i, 60, 0, i);
             }
 
-            // Depth index sorter organizes overlapping canvas assets
+            // Depth sorting tracks order of rendering layers cleanly
             targets.sort((a, b) => {
-                let distA = (a.x - pX)**2 + (a.z - pZ)**2;
-                let distB = (b.x - pX)**2 + (b.z - pZ)**2;
-                return distB - distA;
+                return ((b.x - pX)**2 + (b.z - pZ)**2) - ((a.x - pX)**2 + (a.z - pZ)**2);
             });
 
-            // Map and draw fully shaded geometric 3D target solid cubes
+            // Draw Composite 3D Robot Shapes
             targets.forEach(t => {
                 let r = t.size / 2;
+                let heightOffset = 0.5;
+
+                // Cycle NPC text phrases down smoothly
+                t.phraseTimer--;
+                if(t.phraseTimer <= 0) {
+                    t.phrase = dialoguePhrases[Math.floor(Math.random() * dialoguePhrases.length)];
+                    t.phraseTimer = Math.random() * 200 + 100;
+                }
+
+                // Build 3D Droid Body Box Matrix Coordinates
+                let f1 = projectPoint(t.x - r, heightOffset + r, t.z - r); 
+                let f2 = projectPoint(t.x + r, heightOffset + r, t.z - r); 
+                let f3 = projectPoint(t.x + r, heightOffset - r, t.z - r); 
+                let f4 = projectPoint(t.x - r, heightOffset - r, t.z - r); 
                 
-                let f1 = projectPoint(t.x - r,  r, t.z - r); 
-                let f2 = projectPoint(t.x + r,  r, t.z - r); 
-                let f3 = projectPoint(t.x + r, -r, t.z - r); 
-                let f4 = projectPoint(t.x - r, -r, t.z - r); 
-                
-                let b1 = projectPoint(t.x - r,  r, t.z + r); 
-                let b2 = projectPoint(t.x + r,  r, t.z + r); 
-                let b3 = projectPoint(t.x + r, -r, t.z + r); 
-                let b4 = projectPoint(t.x - r, -r, t.z + r); 
+                let b1 = projectPoint(t.x - r, heightOffset + r, t.z + r); 
+                let b2 = projectPoint(t.x + r, heightOffset + r, t.z + r); 
+                let b3 = projectPoint(t.x + r, heightOffset - r, t.z + r); 
+                let b4 = projectPoint(t.x - r, heightOffset - r, t.z + r); 
 
                 let stroke = '#00ffcc';
 
+                // Render Cube body layers
                 drawFace(b1, b2, b3, b4, '#1b5e20', stroke); 
                 drawFace(f1, b1, b4, f4, '#2e7d32', stroke); 
                 drawFace(f2, b2, b3, f3, '#2e7d32', stroke); 
                 drawFace(f1, f2, b2, b1, '#4caf50', stroke); 
                 drawFace(f4, f3, b3, b4, '#1b5e20', stroke); 
-                drawFace(f1, f2, f3, f4, '#39d353', stroke); 
+                drawFace(f1, f2, f3, f4, '#39d353', stroke);
+
+                // --- NATIVE 3D SPHERE HEAD ATTACHMENT NODE ---
+                let headY = heightOffset + r + 0.4; 
+                let headCenter = projectPoint(t.x, headY, t.z);
+
+                if (headCenter) {
+                    let sphereRadius = (0.55 / -headCenter.depth) * 400;
+
+                    if (sphereRadius > 1) {
+                        ctx.beginPath();
+                        ctx.arc(headCenter.x, headCenter.y, sphereRadius, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#00ffcc';
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1.5;
+                        ctx.stroke();
+
+                        // Tiny neon scanning tracking focal red pupil point
+                        ctx.beginPath();
+                        ctx.arc(headCenter.x, headCenter.y, sphereRadius * 0.3, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#ff3366';
+                        ctx.fill();
+
+                        // --- DYNAMIC DIALOGUE BUBBLE TEXT ---
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = Math.max(10, Math.min(14, 12 / -headCenter.depth * 10)) + 'px monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(t.phrase, headCenter.x, headCenter.y - sphereRadius - 10);
+                    }
+                }
             });
 
             requestAnimationFrame(loop);
         }
 
-        // Initialize Core Loops
         initGame();
         loop();
     </script>

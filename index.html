@@ -152,13 +152,11 @@
             // Check crosshair collision with target centers
             for (let i = targets.length - 1; i >= 0; i--) {
                 let t = targets[i];
-                // Translate
                 let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
                 let rotZ = (t.x - pX) * Math.sin(pYaw) + (t.z - pZ) * Math.cos(pYaw);
 
                 if (rotZ < 0) {
                     let screenX = 400 + (rotX / -rotZ) * 400;
-                    // Check if center screen crosshair matches target boundaries
                     if (Math.abs(screenX - 400) < (t.size / -rotZ) * 400) {
                         targets.splice(i, 1);
                         score++;
@@ -170,12 +168,40 @@
             }
         });
 
+        // Helper to project and track 3D points down to a 2D viewport
+        function projectPoint(x, y, z) {
+            let rotX = (x - pX) * Math.cos(pYaw) - (z - pZ) * Math.sin(pYaw);
+            let rotZ = (x - pX) * Math.sin(pYaw) + (z - pZ) * Math.cos(pYaw);
+            if (rotZ >= -0.5) return null; // Behind camera protection
+            return {
+                x: 400 + (rotX / -rotZ) * 400,
+                y: 250 + (y / -rotZ) * 400,
+                depth: rotZ
+            };
+        }
+
+        // Draws a real 3D solid cube side panel layout face matrix
+        function drawFace(p1, p2, p3, p4, color, strokeColor) {
+            if (!p1 || !p2 || !p3 || !p4) return;
+            ctx.fillStyle = color;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p4.x, p4.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
         // 3D Engine Frame Loop Process
         function loop() {
-            // Processing movements
+            // Processing movements (W and S swapped back cleanly here)
             let speed = 0.15;
-            if (keys.w) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
-            if (keys.s) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
+            if (keys.w) { pX += Math.sin(pYaw) * speed; pZ -= Math.cos(pYaw) * speed; }
+            if (keys.s) { pX -= Math.sin(pYaw) * speed; pZ += Math.cos(pYaw) * speed; }
             if (keys.a) { pX -= Math.cos(pYaw) * speed; pZ -= Math.sin(pYaw) * speed; }
             if (keys.d) { pX += Math.cos(pYaw) * speed; pZ += Math.sin(pYaw) * speed; }
 
@@ -191,53 +217,46 @@
                 drawWorldLine(-50, 0, i, 50, 0, i);
             }
 
-            // Draw Core 3D Objects
+            // Sort targets by depth so things further away render behind close things
+            targets.sort((a, b) => {
+                let distA = (a.x - pX)**2 + (a.z - pZ)**2;
+                let distB = (b.x - pX)**2 + (b.z - pZ)**2;
+                return distB - distA;
+            });
+
+            // Draw Targets as Actual Solid 3D Boxes with Depth
             targets.forEach(t => {
-                // Render matrix coordinates transformation
-                let rotX = (t.x - pX) * Math.cos(pYaw) - (t.z - pZ) * Math.sin(pYaw);
-                let rotZ = (t.x - pX) * Math.sin(pYaw) + (t.z - pZ) * Math.cos(pYaw);
+                let r = t.size / 2;
+                
+                // Track 8 corner vector calculations of the 3D box
+                let f1 = projectPoint(t.x - r,  r, t.z - r); // Front Upper Left
+                let f2 = projectPoint(t.x + r,  r, t.z - r); // Front Upper Right
+                let f3 = projectPoint(t.x + r, -r, t.z - r); // Front Lower Right
+                let f4 = projectPoint(t.x - r, -r, t.z - r); // Front Lower Left
+                
+                let b1 = projectPoint(t.x - r,  r, t.z + r); // Back Upper Left
+                let b2 = projectPoint(t.x + r,  r, t.z + r); // Back Upper Right
+                let b3 = projectPoint(t.x + r, -r, t.z + r); // Back Lower Right
+                let b4 = projectPoint(t.x - r, -r, t.z + r); // Back Lower Left
 
-                if (rotZ < -1) {
-                    let sz = (t.size / -rotZ) * 400;
-                    let sx = 400 + (rotX / -rotZ) * 400;
-                    let sy = 250;
+                let stroke = '#00ffcc';
 
-                    // Rendering Solid Object Layer
-                    ctx.fillStyle = t.color;
-                    ctx.fillRect(sx - sz/2, sy - sz, sz, sz * 2);
-                    
-                    // Highlight Borders
-                    ctx.strokeStyle = '#00ffcc';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(sx - sz/2, sy - sz, sz, sz * 2);
-                }
+                // Render back wall faces first, then wrap up layers forward
+                drawFace(b1, b2, b3, b4, '#1b5e20', stroke); // Back Face
+                drawFace(f1, b1, b4, f4, '#2e7d32', stroke); // Left Face
+                drawFace(f2, b2, b3, f3, '#2e7d32', stroke); // Right Face
+                drawFace(f1, f2, b2, b1, '#4caf50', stroke); // Top Face
+                drawFace(f4, f3, b3, b4, '#1b5e20', stroke); // Bottom Face
+                drawFace(f1, f2, f3, f4, '#39d353', stroke); // Front Face Face
             });
 
             requestAnimationFrame(loop);
         }
 
         function drawWorldLine(x1, y1, z1, x2, y2, z2) {
-            let rx1 = (x1 - pX) * Math.cos(pYaw) - (z1 - pZ) * Math.sin(pYaw);
-            let rz1 = (x1 - pX) * Math.sin(pYaw) + (z1 - pZ) * Math.cos(pYaw);
-            let rx2 = (x2 - pX) * Math.cos(pYaw) - (z2 - pZ) * Math.sin(pYaw);
-            let rz2 = (x2 - pX) * Math.sin(pYaw) + (z2 - pZ) * Math.cos(pYaw);
+            let p1 = projectPoint(x1, y1, z1);
+            let p2 = projectPoint(x2, y2, z2);
 
-            if (rz1 < -1 && rz2 < -1) {
-                let sx1 = 400 + (rx1 / -rz1) * 400;
-                let sy1 = 250 + (y1 / -rz1) * 400;
-                let sx2 = 400 + (rx2 / -rz2) * 400;
-                let sy2 = 250 + (y2 / -rz2) * 400;
-
+            if (p1 && p2) {
                 ctx.beginPath();
-                ctx.moveTo(sx1, sy1);
-                ctx.lineTo(sx2, sy2);
-                ctx.stroke();
-            }
-        }
-
-        // Initialize Core System Execution Loops
-        initGame();
-        loop();
-    </script>
-</body>
-</html>
+                ctx.moveTo(p1.x, p1.y);

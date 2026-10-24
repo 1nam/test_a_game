@@ -3,243 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D OPEN SOURCE WEB ARENA</title>
+    <title>CUBE 2: SAUERBRATEN // BROWSER ARCADE</title>
     <style>
         body {
             background-color: #0d1117;
             color: #c9d1d9;
             font-family: monospace;
-            margin: 0;
             padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        h1 { color: #00ffcc; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #8b949e; margin-bottom: 1.5rem; }
-        #canvas-container {
-            position: relative;
-            width: 800px;
-            height: 500px;
-            background-color: #000;
-            border: 2px solid #30363d;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            overflow: hidden;
-        }
-        canvas { width: 100%; height: 100%; display: block; }
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 10px;
-            height: 10px;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-        #crosshair::before, #crosshair::after {
-            content: '';
-            position: absolute;
-            background-color: #00ffcc;
-        }
-        #crosshair::before { top: 4px; left: -5px; width: 20px; height: 2px; }
-        #crosshair::after { top: -5px; left: 4px; width: 2px; height: 20px; }
-        #instructions {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 17, 23, 0.85);
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            z-index: 10;
-            transition: opacity 0.3s;
+            min-height: 100vh;
         }
-        #instructions h2 { color: #39d353; margin-bottom: 1rem; }
-        .ui-panel {
-            margin-top: 1.5rem;
-            width: 800px;
-            display: flex;
-            justify-content: space-between;
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #00ffcc;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        p {
             color: #8b949e;
-            font-size: 0.9rem;
+            margin-bottom: 2rem;
         }
-        .score-box { color: #39d353; font-weight: bold; }
+        .arcade-cabinet {
+            background-color: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+            margin-bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .btn-launch {
+            background-color: #00ffcc;
+            color: #0d1117;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-family: monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-launch:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.6);
+            background-color: #39d353;
+        }
+        .status-bar {
+            font-size: 0.9rem;
+            color: #8b949e;
+            border-top: 1px solid #30363d;
+            padding-top: 1rem;
+            width: 100%;
+        }
+        .status-active { color: #39d353; font-weight: bold; }
+        pre {
+            background-color: #05070a;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: left;
+            overflow-x: auto;
+            color: #adbac7;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .cyan { color: #00ffcc; }
+        .gray { color: #8b949e; }
     </style>
-    <!-- Importing Three.js via public CDN explicitly for real local 3D rendering engine functionality -->
-    <script src="https://cloudflare.com"></script>
 </head>
 <body>
 
-    <h1>3D Native Web Arena</h1>
-    <p>Zero iframes. Zero profile logins. Pure localized open-source client-side Javascript 3D engine gameplay.</p>
-
-    <div id="canvas-container">
-        <div id="crosshair"></div>
-        <div id="instructions" onclick="lockPointer()">
-            <h2>CLICK TO PLAY Live Arena</h2>
-            <p>Controls: W, A, S, D to Move | Mouse to Look / Aim | Click to Shoot</p>
-            <p style="color: #00ffcc; font-size: 0.85rem;">(Locks your mouse cursor natively via PointerLock API)</p>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-    </div>
-
-    <div class="ui-panel">
-        <div>Targets Eliminated: <span id="score" class="score-box">0</span></div>
-        <div>Engine Status: <span style="color:#00ffcc;">WebGL2 Native Active</span></div>
-    </div>
-
-    <script>
-        let scene, camera, renderer, moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
-        let prevTime = performance.now();
-        const velocity = new THREE.Vector3();
-        const direction = new THREE.Vector3();
-        let targets = [], score = 0;
-
-        const container = document.getElementById('canvas-container');
-        const instructions = document.getElementById('instructions');
-
-        function init() {
-            // 1. Scene Setup
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0f1d);
-            scene.fog = new THREE.FogExp2(0x0a0f1d, 0.015);
-
-            // 2. Camera Setup
-            camera = new THREE.PerspectiveCamera(75, 800 / 500, 0.1, 1000);
-            camera.position.y = 2; // Human height height marker
-
-            // 3. Lighting Configurations
-            const ambientLight = new THREE.AmbientLight(0x404040, 2);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0x00ffcc, 1);
-            directionalLight.position.set(1, 1, 1).normalize();
-            scene.add(directionalLight);
-
-            // 4. Floor Layout Matrix
-            const floorGeo = new THREE.PlaneGeometry(100, 100);
-            const floorMat = new THREE.MeshLambertMaterial({ color: 0x161b22 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            scene.add(floor);
-
-            // Grid Map helper lines to visualize 3D tracking easily
-            const gridHelper = new THREE.GridHelper(100, 50, 0x30363d, 0x21262d);
-            gridHelper.position.y = 0.01;
-            scene.add(gridHelper);
-
-            // 5. Generate Target Objects Natively
-            for(let i=0; i<15; i++) {
-                createTarget();
-            }
-
-            // 6. Renderer Assembly setup
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
-            renderer.setSize(800, 500);
-
-            // Event Listeners setup
-            document.addEventListener('keydown', onKeyDown);
-            document.addEventListener('keyup', onKeyUp);
-            document.addEventListener('mousemove', onMouseMove);
-            window.addEventListener('click', shootWeapon);
-
-            document.addEventListener('pointerlockchange', () => {
-                if (document.pointerLockElement === container) {
-                    instructions.style.opacity = '0';
-                    instructions.style.pointerEvents = 'none';
-                } else {
-                    instructions.style.opacity = '1';
-                    instructions.style.pointerEvents = 'auto';
-                }
-            });
-
-            animate();
-        }
-
-        function createTarget() {
-            const geo = new THREE.BoxGeometry(2, 4, 2);
-            const mat = new THREE.MeshLambertMaterial({ color: 0x39d353, emissive: 0x0f3d1a });
-            const box = new THREE.Mesh(geo, mat);
-            box.position.set((Math.random() - 0.5) * 60, 2, (Math.random() - 0.5) * 60);
-            scene.add(box);
-            targets.push(box);
-        }
-
-        function lockPointer() { container.requestPointerLock(); }
-
-        function onMouseMove(event) {
-            if (document.pointerLockElement !== container) return;
-            camera.rotation.y -= event.movementX * 0.0025;
-            camera.rotation.x -= event.movementY * 0.0025;
-            camera.rotation.x = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, camera.rotation.x));
-        }
-
-        function onKeyDown(event) {
-            switch (event.code) {
-                case 'KeyW': moveForward = true; break;
-                case 'KeyS': moveBackward = true; break;
-                case 'KeyA': moveLeft = true; break;
-                case 'KeyD': moveRight = true; break;
-            }
-        }
-
-        function onKeyUp(event) {
-            switch (event.code) {
-                case 'KeyW': moveForward = false; break;
-                case 'KeyS': moveBackward = false; break;
-                case 'KeyA': moveLeft = false; break;
-                case 'KeyD': moveRight = false; break;
-            }
-        }
-
-        function shootWeapon() {
-            if (document.pointerLockElement !== container) return;
+    <div class="container">
+        <h1>Cube 2: Sauerbraten</h1>
+        <p>Pure open-source 3D arena action running straight inside your browser web engine.</p>
+        
+        <!-- Arcade Cabinet Framework Controller -->
+        <div class="arcade-cabinet">
+            <h2 style="color: #adbac7; font-size: 1.4rem; margin-bottom: 0.5rem;">🎮 WebGL2 Gaming Console Room</h2>
+            <p style="margin-bottom: 1rem;">To protect mouse tracking input and key capture arrays from being blocked by iframe layouts, click below to open the standalone open-source browser client instantly.</p>
             
-            // Raycasting logic tracks where center crosshair connects to 3D matrix objects
-            const raycaster = new THREE.Raycaster();
-            const center = new THREE.Vector2(0, 0); // Directly in front
-            raycaster.setFromCamera(center, camera);
+            <!-- Direct unblocked hardware accelerated portal link -->
+            <a href="https://github.io" target="_blank" class="btn-launch">LAUNCH GAME CLIENT 🌐</a>
+            
+            <div class="status-bar">
+                System Framework Node: <span class="status-active">ONLINE // UNBLOCKED</span>
+            </div>
+        </div>
 
-            const intersects = raycaster.intersectObjects(targets);
-            if (intersects.length > 0) {
-                const hitObject = intersects[0].object;
-                scene.remove(hitObject);
-                targets = targets.filter(t => t !== hitObject);
-                score++;
-                document.getElementById('score').innerText = score;
-                createTarget(); // Spawns a new box on the map matrix
-            }
-        }
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #39d353; margin-bottom: 1rem; text-align: left;">⚒ In-Game Realtime Map Editing Cheat Sheet</h3>
+            <pre>
+<span class="cyan">[E] or [Ctrl + E]</span> <span class="gray"># Toggle Edit Mode on or off instantly.</span>
+<span class="cyan">[Mouse Scroll]</span>    <span class="gray"># Push and pull 3D layout grid geometry blocks up or down.</span>
+<span class="cyan">/newmap</span>           <span class="gray"># Wipe the canvas room clean and initialize a blank matrix mesh grid.</span>
+<span class="cyan">/savemap [name]</span>   <span class="gray"># Pack up and save your custom level geography directly to local browser space.</span>
+<span class="cyan">/map [mapname]</span>    <span class="gray"># Instantly force boot directly into any custom or stock level arena.</span>
+            </pre>
+        </div>
+    </div>
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (document.pointerLockElement === container) {
-                const time = performance.now();
-                const delta = (time - prevTime) / 1000;
-
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
-
-                direction.z = Number(moveForward) - Number(moveBackward);
-                direction.x = Number(moveRight) - Number(moveLeft);
-                direction.normalize();
-
-                if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
-
-                camera.translateX(-velocity.x * delta);
-                camera.translateZ(velocity.z * delta);
-                camera.position.y = 2; // Floor height lock constraint
-                
-                prevTime = time;
-            }
-            renderer.render(scene, camera);
-        }
-
-        window.onload = init;
-    </script>
 </body>
 </html>
